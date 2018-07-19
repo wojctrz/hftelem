@@ -5,9 +5,9 @@ app = Flask(__name__)
 
 
 class FlightData:
-    lat = 0
-    lon = 0
-    height = 0
+    Latitude = 0
+    Longitude = 0
+    Height = 0
 
     def toJSON(self):
         return json.dumps(self, default=lambda o: o.__dict__, 
@@ -34,6 +34,8 @@ def poster():
             return "OK", 200
         except KeyError:
             return "Something went wrong", 400     #400 - Bad Request
+    else:
+        return "POSTed string is not JSON!", 400
 
 @app.route('/getter', methods = ['GET'])
 def getter():
@@ -41,4 +43,4 @@ def getter():
     return fldat.toJSON()
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()
