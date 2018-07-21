@@ -4,18 +4,7 @@ import json
 app = Flask(__name__)
 
 
-class FlightData:
-    Latitude = 0
-    Longitude = 0
-    Height = 0
-
-    def toJSON(self):
-        return json.dumps(self, default=lambda o: o.__dict__, 
-            sort_keys=False, indent=4)
-
-
-fldat = FlightData()
-fldat.lat = 1
+buffer = ""
 
 @app.route('/')
 def index():
@@ -23,24 +12,24 @@ def index():
 
 @app.route('/poster', methods = ['POST'])
 def poster():
-    global fldat
-    #return str(current_app.xd)
-    if request.is_json:
-        try:
-            content = request.get_json()
-            fldat.lat = content['Latitude']
-            fldat.lon = content['Longitude']
-            fldat.height = content['Height']
-            return "OK", 200
-        except KeyError:
-            return "Something went wrong", 400     #400 - Bad Request
-    else:
-        return "POSTed string is not JSON!", 400
+    global buffer
+    try:
+        if request.is_json:
+            buffer = request.get_json()
+        else:
+            buffer = request.data
+        print('CDDDD')
+        print(buffer)
+        return "OK", 200
+    except KeyError:
+        return "Something went wrong", 400     #400 - Bad Request
+
 
 @app.route('/getter', methods = ['GET'])
 def getter():
-    global fldat
-    return fldat.toJSON()
+    global buffer
+    #TODO - distinguish JSON request from another thingzz
+    return jsonify(buffer)
 
 if __name__ == "__main__":
     app.run()
