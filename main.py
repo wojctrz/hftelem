@@ -3,19 +3,14 @@ import json
 
 app = Flask(__name__)
 
+class PostData:
+    def __init__(self):
+        self.buffer = ""
+        self.datatype = ""
 
-class FlightData:
-    lat = 0
-    lon = 0
-    height = 0
+postdata = PostData()
+print('abcdef')
 
-    def toJSON(self):
-        return json.dumps(self, default=lambda o: o.__dict__, 
-            sort_keys=False, indent=4)
-
-
-fldat = FlightData()
-fldat.lat = 1
 
 @app.route('/')
 def index():
@@ -23,22 +18,29 @@ def index():
 
 @app.route('/poster', methods = ['POST'])
 def poster():
-    global fldat
-    #return str(current_app.xd)
-    if request.is_json:
-        try:
-            content = request.get_json()
-            fldat.lat = content['Latitude']
-            fldat.lon = content['Longitude']
-            fldat.height = content['Height']
-            return "OK", 200
-        except KeyError:
-            return "Something went wrong", 400     #400 - Bad Request
+    global postdata
+    try:
+        if request.is_json:
+            postdata.buffer = request.get_json()
+            postdata.datatype = "JSON"
+        else:
+            postdata.buffer = request.data
+            postdata.datatype = "rawtext"
+        print('CDDDD')
+        print(postdata.buffer)
+        return "OK", 200
+    except KeyError:
+        return "Something went wrong", 400     #400 - Bad Request
+
 
 @app.route('/getter', methods = ['GET'])
 def getter():
-    global fldat
-    return fldat.toJSON()
+    global postdata
+    #TODO - distinguish JSON request from another thingzz
+    if postdata.datatype == "JSON":
+        return jsonify(postdata.buffer)
+    else:
+        return postdata.buffer
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()
