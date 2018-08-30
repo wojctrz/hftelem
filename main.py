@@ -3,8 +3,14 @@ import json
 
 app = Flask(__name__)
 
+class PostData:
+    def __init__(self):
+        self.buffer = ""
+        self.datatype = ""
 
-buffer = ""
+postdata = PostData()
+print('abcdef')
+
 
 @app.route('/')
 def index():
@@ -12,14 +18,16 @@ def index():
 
 @app.route('/poster', methods = ['POST'])
 def poster():
-    global buffer
+    global postdata
     try:
         if request.is_json:
-            buffer = request.get_json()
+            postdata.buffer = request.get_json()
+            postdata.datatype = "JSON"
         else:
-            buffer = request.data
+            postdata.buffer = request.data
+            postdata.datatype = "rawtext"
         print('CDDDD')
-        print(buffer)
+        print(postdata.buffer)
         return "OK", 200
     except KeyError:
         return "Something went wrong", 400     #400 - Bad Request
@@ -27,9 +35,12 @@ def poster():
 
 @app.route('/getter', methods = ['GET'])
 def getter():
-    global buffer
+    global postdata
     #TODO - distinguish JSON request from another thingzz
-    return jsonify(buffer)
+    if postdata.datatype == "JSON":
+        return jsonify(postdata.buffer)
+    else:
+        return postdata.buffer
 
 if __name__ == "__main__":
     app.run()
